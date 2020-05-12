@@ -1,0 +1,8 @@
+spring:
+  kafka:
+    consumer:
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      properties:
+        session.timeout.ms: 120000
+        max.poll.interval.ms: 900000
