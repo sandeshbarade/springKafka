@@ -5,4 +5,4 @@ spring:
       auto-offset-reset: earliest
       properties:
         session.timeout.ms: 120000
-        max.poll.interval.ms: 900000
+        max.poll.interval.ms: 420000

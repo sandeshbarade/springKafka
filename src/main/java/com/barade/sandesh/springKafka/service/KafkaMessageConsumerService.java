@@ -14,10 +14,8 @@ public class KafkaMessageConsumerService {
 
     @KafkaListener(topics = "firstTopic", groupId = "firstTopic-group")
     public void onCustomerMessage(String message) throws Exception {
-        System.out.println(new Date().getTime() + "Message  = "+ message + "    is received");
 
-
-
+        System.out.println("\n"+new Date().getTime() + " -> Message  = "+ message + "    is received");
         if (message.contains("Test")) {
             System.out.println("Exception caught now throw an exception for incompatible message ="+ message+"\n");
             throw new RuntimeException("Incompatible message " + message);
