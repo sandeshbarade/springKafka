@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
+import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.listener.SeekToCurrentErrorHandler;
 import org.springframework.kafka.support.serializer.DeserializationException;
@@ -81,6 +82,8 @@ public class KakfaConfiguration {
         // add the custom consumerFactory
         factory.setConsumerFactory(consumerFactory());
         factory.setRetryTemplate(kafkaRetry());
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+
         factory.setStatefulRetry(true);
         factory.setErrorHandler(getErrorHandler());
         factory.setRecoveryCallback(retryContext -> {
