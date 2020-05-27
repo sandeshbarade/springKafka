@@ -1,29 +1,32 @@
 package com.barade.sandesh.springKafka.config;
 
 import com.barade.sandesh.springKafka.model.User;
+
 import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.boot.autoconfigure.kafka.ConcurrentKafkaListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.listener.SeekToCurrentErrorHandler;
 import org.springframework.kafka.support.serializer.DeserializationException;
-import org.springframework.kafka.support.serializer.JsonSerializer;
+
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
+
+import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +45,21 @@ public class KakfaConfiguration {
         return new DefaultKafkaProducerFactory<>(config);
     }
 
+    /**
+     * New configuration for the consumerFactory added
+     * @return
+     */
+    @Bean
+    public ConsumerFactory<String,User> consumerFactory(){
+        Map<String, Object> config = new HashMap<>();
+        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "firstTopic-group");
+        config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        return new DefaultKafkaConsumerFactory<>(config,new StringDeserializer(),  new JsonDeserializer<User>(User.class) );
+    }
+
 
     @Bean
     public KafkaTemplate<String, User> kafkaTemplate(){
@@ -49,13 +67,19 @@ public class KakfaConfiguration {
     }
 
 
+
+
     @Bean
     public ConcurrentKafkaListenerContainerFactory<?, ?> kafkaListenerContainerFactory(
-            ConcurrentKafkaListenerContainerFactoryConfigurer factoryConfigurer,
-            ConsumerFactory<Object, Object> kafkaConsumerFactory) {
+            ConcurrentKafkaListenerContainerFactoryConfigurer factoryConfigurer
+            //   ,     ConsumerFactory<Object, Object> kafkaConsumerFactory
+    ) {
 
-        ConcurrentKafkaListenerContainerFactory<Object, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factoryConfigurer.configure(factory, kafkaConsumerFactory);
+        ConcurrentKafkaListenerContainerFactory<String,User> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        //factoryConfigurer.configure(factory, kafkaConsumerFactory);
+
+        // add the custom consumerFactory
+        factory.setConsumerFactory(consumerFactory());
         factory.setRetryTemplate(kafkaRetry());
         factory.setStatefulRetry(true);
         factory.setErrorHandler(getErrorHandler());
@@ -76,8 +100,8 @@ public class KakfaConfiguration {
 
         ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
         backOffPolicy.setInitialInterval(60*1000);
-        backOffPolicy.setMultiplier(5);
-        backOffPolicy.setMaxInterval(6*60*1000);       // original 25 * 60 * 1000
+        backOffPolicy.setMultiplier(3);
+        backOffPolicy.setMaxInterval(4*60*1000);       // original 25 * 60 * 1000
         retryTemplate.setBackOffPolicy(backOffPolicy);
 
         SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();

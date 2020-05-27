@@ -1,8 +1,9 @@
 spring:
   kafka:
     consumer:
-      enable-auto-commit: false
+      enable-auto-commit: true
       auto-offset-reset: earliest
       properties:
         session.timeout.ms: 120000
-        max.poll.interval.ms: 420000
+        max.poll.interval.ms: 300000
+        max.poll.records: 2

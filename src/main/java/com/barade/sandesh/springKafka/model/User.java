@@ -29,23 +29,18 @@ public class User {
         this.userName = userName;
     }
 
-    public List<String> getAccountTypes() {
-        return accountTypes;
-    }
 
-    public void setAccountTypes(List<String> accountTypes) {
-        this.accountTypes = accountTypes;
+    public User() {
+        super();
     }
-
-    public User(String firstName, String lastName, String userName, List<String> accountTypes) {
+    public User(String firstName, String lastName, String userName ) {
+        super();
         this.firstName = firstName;
         this.lastName = lastName;
         this.userName = userName;
-        this.accountTypes = accountTypes;
     }
 
     private String lastName;
     private String userName;
-    private List<String> accountTypes;
 
 }

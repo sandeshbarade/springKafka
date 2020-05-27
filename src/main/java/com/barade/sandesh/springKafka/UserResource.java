@@ -15,13 +15,12 @@ public class UserResource {
     @Autowired
     KafkaTemplate <String, User> kafkaTemplate;
     @PostMapping("/users")
-    public String postComments(@RequestParam ("fName") final String firstName,
-                                    @RequestParam ("lName") final String lastName,
+    public String postComments(@RequestParam ("firstName") final String firstName,
+                                    @RequestParam ("lastName") final String lastName,
                                     @RequestParam ("userName") final String userName )  {
 
         List<String> accountTypes = new ArrayList<String>();
-        kafkaTemplate.send("firstTopic", new User( firstName,  lastName,  userName, accountTypes) );
-
+        kafkaTemplate.send("firstTopic", new User(firstName,lastName,userName));
 
         return "Message sent to the Error queue";
     }
