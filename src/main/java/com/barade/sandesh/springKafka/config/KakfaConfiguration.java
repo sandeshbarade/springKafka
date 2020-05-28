@@ -43,7 +43,11 @@ public class KakfaConfiguration {
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        return new DefaultKafkaProducerFactory<>(config);
+
+        DefaultKafkaProducerFactory<Integer, String> defaultKafkaProducerFactory = new DefaultKafkaProducerFactory<>(config);
+        defaultKafkaProducerFactory.setTransactionIdPrefix("tx-");
+        return defaultKafkaProducerFactory;
+        //return new DefaultKafkaProducerFactory<>(config);
     }
 
     /**
@@ -92,14 +96,12 @@ public class KakfaConfiguration {
             System.out.println("Recovery is called for message  "+consumerRecord.value());
             return Optional.empty();
         });
+
         return factory;
     }
 
     public RetryTemplate kafkaRetry() {
         RetryTemplate retryTemplate = new RetryTemplate();
-        //FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
-        //fixedBackOffPolicy.setBackOffPeriod(10 * 1000l);
-        //retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
 
         ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
         backOffPolicy.setInitialInterval(60*1000);
@@ -150,3 +152,5 @@ public class KakfaConfiguration {
 
 
 }
+
+
